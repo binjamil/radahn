@@ -2,4 +2,7 @@
 \#*#
 *.o
 
+server
+client
+
 .DS_Store
