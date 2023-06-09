@@ -6,6 +6,7 @@
 enum CmdType {
   CmdTypeInvalid,
   CmdTypePing,
+  CmdTypeCommand,
 };
 
 typedef struct Cmd {
