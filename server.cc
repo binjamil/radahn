@@ -9,11 +9,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "protocol.hh"
+
 #define MAXCONN 4096
 #define PORT "6369"
+#define BUF_SIZE 512
 
 struct client_info {
-  int sock_fd;
+  int sockfd;
   struct sockaddr_storage addr;
   pthread_t thread_id;
 };
@@ -25,7 +28,16 @@ static void *client_handler(void *arg) {
   inet_ntop(AF_INET, &sa->sin_addr, ip4, INET_ADDRSTRLEN);
   printf("Accepted new connection: (%s, %d)\n", ip4, sa->sin_port);
 
-  close(cinfo->sock_fd);
+  char buf[BUF_SIZE];
+  int bytes_read;
+
+  bytes_read = recv(cinfo->sockfd, buf, BUF_SIZE, 0);
+  if (bytes_read == -1) {
+    perror("recv");
+  }
+  printf("recv: %s\n", buf);
+
+  close(cinfo->sockfd);
   free(cinfo);
   pthread_exit(NULL);
 }
@@ -76,7 +88,7 @@ int main(int argc, char *argv[]) {
     size_t sz = sizeof(struct client_info);
     struct client_info *cinfo = (struct client_info *)malloc(sz);
     memset(cinfo, 0, sz);
-    cinfo->sock_fd = client_fd;
+    cinfo->sockfd = client_fd;
     // cinfo->addr = client_addr;
     memcpy(&cinfo->addr, &client_addr, addr_size);
     pthread_create(&cinfo->thread_id, NULL, client_handler, (void *)cinfo);

@@ -32,5 +32,20 @@ int main(int argc, char *argv[]) {
   }
   printf("Connection established\n");
 
+  char *cmd = "*2\r\n$4\r\nPING\r\n$6\r\nsheesh\r\n";
+  int len, bytes_sent;
+
+  len = strlen(cmd);
+  bytes_sent = send(sockfd, cmd, len, 0);
+  if (bytes_sent == -1) {
+    perror("send");
+    exit(EXIT_FAILURE);
+  }
+  if (bytes_sent != len) {
+    fprintf(stderr, "Failed to send complete data in one go!");
+    exit(EXIT_FAILURE);
+  }
+  printf("send: %s\n", cmd);
+
   freeaddrinfo(res);
 }
