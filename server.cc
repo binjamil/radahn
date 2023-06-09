@@ -28,15 +28,31 @@ static void *client_handler(void *arg) {
   inet_ntop(AF_INET, &sa->sin_addr, ip4, INET_ADDRSTRLEN);
   printf("Accepted new connection: (%s, %d)\n", ip4, sa->sin_port);
 
-  char buf[BUF_SIZE];
-  int bytes_read;
+  char buf[BUF_SIZE], resp[BUF_SIZE];
+  int bytes_read, bytes_sent;
 
   bytes_read = recv(cinfo->sockfd, buf, BUF_SIZE, 0);
   if (bytes_read == -1) {
     perror("recv");
   }
-  printf("recv: %s\n", buf);
 
+  Cmd *cmd = parse_cmd(buf);
+  // TODO: move this to handler.cc
+  if (cmd->type == CmdTypePing) {
+    if (cmd->argc == 1) {
+      sprintf(resp, "+PONG\r\n");
+    }
+    else {
+      char *pong = cmd->argv[1];
+      sprintf(resp, "$%lu\r\n%s\r\n", strlen(pong), pong);
+    }
+    bytes_sent = send(cinfo->sockfd, resp, strlen(resp), 0);
+    if (bytes_sent == -1) {
+      perror("send");
+    }
+  }
+
+  cleanup_cmd(cmd);
   close(cinfo->sockfd);
   free(cinfo);
   pthread_exit(NULL);
