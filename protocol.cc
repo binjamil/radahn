@@ -25,9 +25,9 @@ Cmd *parse_cmd(char *buf) {
   }
 
   cmd->argc = arglen;
-  cmd->argv = (char**) calloc(arglen, sizeof(char*));
+  cmd->argv = (char **)calloc(arglen, sizeof(char *));
 
-  for (int i=0; i<arglen; i++) {
+  for (int i = 0; i < arglen; i++) {
     int tokenlen = 0;
     buf += 3;
     while (*buf != '\r') {
@@ -35,7 +35,7 @@ Cmd *parse_cmd(char *buf) {
       buf++;
     }
     buf += 2;
-    cmd->argv[i] = (char*) calloc(tokenlen + 1, sizeof(char));
+    cmd->argv[i] = (char *)calloc(tokenlen + 1, sizeof(char));
     memcpy(cmd->argv[i], buf, tokenlen);
     cmd->argv[i][tokenlen] = '\0';
     buf += tokenlen;
@@ -70,35 +70,17 @@ static CmdType getCmdType(char *cmd_name) {
   if (strcmp(cmd_name, "PING") == 0) {
     return CmdTypePing;
   }
+  if (strcmp(cmd_name, "COMMAND") == 0) {
+    return CmdTypeCommand;
+  }
+  if (strcmp(cmd_name, "GET") == 0) {
+    return CmdTypeGet;
+  }
+  if (strcmp(cmd_name, "SET") == 0) {
+    return CmdTypeSet;
+  }
+  if (strcmp(cmd_name, "DEL") == 0) {
+    return CmdTypeDel;
+  }
   return CmdTypeInvalid;
 }
-
-// char *s1 = "PING";
-// char *s2 = "SHEESHKABABPAKSORA";
-// printf("%lu\n", sizeof(Cmd));
-// Cmd* cmd = (Cmd*) malloc(sizeof(Cmd));
-// memset(cmd, 0, sizeof(Cmd));
-// cmd->type = CmdTypePing;
-// cmd->argc = 2;
-// cmd->argv = (char**) calloc(cmd->argc, sizeof(char*));
-// printf("cmd_type: %d\ncmd_argc: %d\ncmd_args: %p\n", cmd->type, cmd->argc,
-// cmd->argv); for (int i = 0; i < cmd->argc; i++) {
-//   char* s;
-//   if (i == 0) {
-//     s = s1;
-//   } else {
-//     s = s2;
-//   }
-//   cmd->argv[i] = (char*) calloc(strlen(s) + 1, 1);
-//   memcpy(cmd->argv[i], s, strlen(s));
-// }
-// for (int i = 0; i < cmd->argc; i++) {
-//   printf("cmd_argv[%d]: %s\n", i, cmd->argv[i]);
-// }
-//
-// for (int i = 0; i < cmd->argc; i++) {
-//   free(cmd->argv[i]);
-// }
-// free(cmd->argv);
-// free(cmd);
-// return 0;

@@ -6,7 +6,7 @@ CFLAGS=-O0 -Wall -g
 .PHONY: all clean
 
 BINS=server client
-LDFLAGS=
+LDFLAGS=-lstdc++
 all: $(BINS)
 
 %.o: %.cc
