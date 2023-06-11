@@ -18,7 +18,7 @@ client: client.o
 test%: protocol.o test%.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
-server: server.o protocol.o
+server: server.o protocol.o handler.o
 	$(CC) $(LDFLAGS) $^ -lpthread -o $@
 
 clean:
