@@ -88,7 +88,12 @@ static void del(Cmd *cmd, char *resp, int resp_len) {
     int n_del = 0;
     for (unsigned int i = 1; i < cmd->argc; i++) {
       std::string key = cmd->argv[i];
-      n_del += keyspace.erase(key);
+      auto found = keyspace.find(key);
+      if (found != keyspace.end()) {
+        free(found->second.val);
+        keyspace.erase(found);
+        n_del++;
+      }
     }
     sprintf(resp, ":%d\r\n", n_del);
   }
