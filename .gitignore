@@ -5,7 +5,7 @@
 server
 client
 test*
-
 !test*.cc
+!test*.hh
 
 .DS_Store
