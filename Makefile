@@ -1,12 +1,12 @@
 TESTS=$(patsubst %.cc,%,$(sort $(wildcard test[0-9][0-9].cc test[0-9][0-9][0-9a-z].cc test[0-9][0-9][0-9][a-z].cc)))
 
-CC=gcc
-CFLAGS=-O0 -Wall -g -std=c++17
+CC=g++
+CFLAGS=-O0 -Wall -g
 
 .PHONY: all clean
 
 BINS=server
-LDFLAGS=-lstdc++
+# LDFLAGS=-lstdc++
 all: $(BINS) $(TESTS)
 
 %.o: %.cc
