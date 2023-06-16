@@ -5,18 +5,18 @@ CFLAGS=-O0 -Wall -g
 
 .PHONY: all clean
 
-BINS=server client
+BINS=server
 LDFLAGS=-lstdc++
-all: $(BINS)
+all: $(BINS) $(TESTS)
 
 %.o: %.cc
 	$(CC) $(CFLAGS) $^ -c
 
-client: client.o
+test%: protocol.o handler.o test%.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
-test%: protocol.o test%.o
-	$(CC) $(LDFLAGS) $^ -o $@
+check: $(TESTS)
+	set -e; for t in $(TESTS); do ./$$t; done
 
 server: server.o protocol.o handler.o
 	$(CC) $(LDFLAGS) $^ -lpthread -o $@
