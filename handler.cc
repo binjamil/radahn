@@ -1,36 +1,26 @@
 #include <cstdio>
 #include <cstring>
-#include <ctime>
-#include <map>
-#include <string>
 
 #include "handler.hh"
-#include "protocol.hh"
 
-typedef struct RadahnObject {
-  char *val;
-  time_t exp;
-} RadahnObject;
-
-static std::map<std::string, RadahnObject> keyspace;
-static void ping(Cmd *cmd, char *resp, int resp_len);
-static void get(Cmd *cmd, char *resp, int resp_len);
-static void set(Cmd *cmd, char *resp, int resp_len);
-static void del(Cmd *cmd, char *resp, int resp_len);
+static void ping(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len);
+static void get(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len);
+static void set(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len);
+static void del(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len);
 
 /************************/
 /*** PUBLIC FUNCTIONS ***/
 /************************/
 
-void handle_cmd(Cmd *cmd, char *resp, int resp_len) {
+void handle_cmd(Keyspace& keyspace, Cmd *cmd, char* resp, int resp_len) {
   if (cmd->type == CmdTypePing) {
-    ping(cmd, resp, resp_len);
+    ping(keyspace, cmd, resp, resp_len);
   } else if (cmd->type == CmdTypeGet) {
-    get(cmd, resp, resp_len);
+    get(keyspace, cmd, resp, resp_len);
   } else if (cmd->type == CmdTypeSet) {
-    set(cmd, resp, resp_len);
+    set(keyspace, cmd, resp, resp_len);
   } else if (cmd->type == CmdTypeDel) {
-    del(cmd, resp, resp_len);
+    del(keyspace, cmd, resp, resp_len);
   } else if (cmd->type == CmdTypeCommand) {
     sprintf(resp, "+OK\r\n");
   } else {
@@ -42,7 +32,7 @@ void handle_cmd(Cmd *cmd, char *resp, int resp_len) {
 /*** PRIVATE FUNCTIONS ***/
 /*************************/
 
-static void ping(Cmd *cmd, char *resp, int resp_len) {
+static void ping(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
   if (cmd->argc == 1) {
     sprintf(resp, "+PONG\r\n");
   } else {
@@ -51,7 +41,7 @@ static void ping(Cmd *cmd, char *resp, int resp_len) {
   }
 }
 
-static void get(Cmd *cmd, char *resp, int resp_len) {
+static void get(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
   if (cmd->argc < 2) {
     sprintf(resp, "-ERR: Not enough arguments\r\n");
   } else {
@@ -75,7 +65,7 @@ static void get(Cmd *cmd, char *resp, int resp_len) {
   }
 }
 
-static void set(Cmd *cmd, char *resp, int resp_len) {
+static void set(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
   if (cmd->argc < 3) {
     sprintf(resp, "-ERR: Not enough arguments\r\n");
   } else {
@@ -104,7 +94,7 @@ static void set(Cmd *cmd, char *resp, int resp_len) {
   }
 }
 
-static void del(Cmd *cmd, char *resp, int resp_len) {
+static void del(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
   if (cmd->argc < 2) {
     sprintf(resp, "-ERR: Not enough arguments\r\n");
   } else {
