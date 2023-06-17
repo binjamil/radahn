@@ -4,7 +4,7 @@
 #include "protocol.hh"
 #include <string>
 
-Cmd* setup_cmd(CmdType t, std::string argv[]);
+Cmd* setup_cmd(CmdType t, int argc, std::string argv[]);
 void teardown_cmd(Cmd* cmd);
 
 #endif

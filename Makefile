@@ -5,7 +5,7 @@ BINS=server
 
 .PHONY: all clean
 
-all: $(BINS) $(TESTS)
+all: $(BINS)
 
 %.o: %.cc
 	$(CC) $(CFLAGS) $^ -c

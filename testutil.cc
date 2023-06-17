@@ -1,11 +1,11 @@
 #include "testutil.hh"
 
-Cmd* setup_cmd(CmdType t, std::string argv[]) {
+Cmd* setup_cmd(CmdType t, int argc, std::string argv[]) {
   Cmd *cmd = (Cmd *)calloc(1, sizeof(Cmd));
-  cmd->type = CmdTypeGet;
-  cmd->argc = 2;
-  cmd->argv = (char **)calloc(cmd->argc, sizeof(char *));
-  for (int i = 0; i < 2; i++) {
+  cmd->type = t;
+  cmd->argc = argc;
+  cmd->argv = (char **)calloc(argc, sizeof(char *));
+  for (int i = 0; i < argc; i++) {
     cmd->argv[i] = (char *)argv[i].c_str();
   }
   return cmd;

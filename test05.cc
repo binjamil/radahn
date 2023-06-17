@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
   std::string test_argv[2] = {"GET", "foo"};
   std::string test_val = "bar";
 
-  Cmd *cmd = setup_cmd(CmdTypeGet, test_argv);
+  Cmd *cmd = setup_cmd(CmdTypeGet, 2, test_argv);
   Keyspace ks;
   RadahnObject robj;
   robj.val = (char *)test_val.c_str();
