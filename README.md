@@ -14,7 +14,7 @@
 
 ## Overview
 
-Radahn is designed to be simple. It supports a tiny fraction of Redis commands, only the most useful ones, so that there are minimum overhead costs. As a result of simple design philosophy, Radahn is ~1.4x faster than Redis ([see benchmarks below](##benchmarks)).
+Radahn is designed to be simple. It supports a tiny fraction of Redis commands, only the most useful ones, so that there are minimum overhead costs. As a result of simple design philosophy, Radahn is ~1.4x faster than Redis ([see benchmarks below](#benchmarks)).
 
 ### Supported commands
 
