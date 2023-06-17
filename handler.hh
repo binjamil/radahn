@@ -2,8 +2,19 @@
 #define __HANDLER_HH__
 
 #include <cstdint>
+#include <ctime>
+#include <map>
+#include <string>
+
 #include "protocol.hh"
 
-void handle_cmd(Cmd *cmd, char* resp, int resp_len);
+typedef struct RadahnObject {
+  char *val;
+  time_t exp;
+} RadahnObject;
+
+typedef std::map<std::string, RadahnObject> Keyspace;
+
+void handle_cmd(Keyspace& keyspace, Cmd *cmd, char* resp, int resp_len);
 
 #endif

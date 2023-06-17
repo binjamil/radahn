@@ -1,18 +1,16 @@
 TESTS=$(patsubst %.cc,%,$(sort $(wildcard test[0-9][0-9].cc test[0-9][0-9][0-9a-z].cc test[0-9][0-9][0-9][a-z].cc)))
-
 CC=g++
 CFLAGS=-O0 -Wall -g
+BINS=server
 
 .PHONY: all clean
 
-BINS=server
-# LDFLAGS=-lstdc++
-all: $(BINS) $(TESTS)
+all: $(BINS)
 
 %.o: %.cc
 	$(CC) $(CFLAGS) $^ -c
 
-test%: protocol.o handler.o test%.o
+test%: protocol.o handler.o test%.o testutil.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 check: $(TESTS)

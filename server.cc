@@ -63,6 +63,9 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
+  // Keyspace holds all key-value pairs
+  Keyspace ks;
+
   // The event loop
   while (1) {
     nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
@@ -106,7 +109,7 @@ int main(int argc, char *argv[]) {
           continue;
         }
         Cmd *cmd = parse_cmd(buf);
-        handle_cmd(cmd, resp, BUF_SIZE);
+        handle_cmd(ks, cmd, resp, BUF_SIZE);
         bytes_sent = send(events[i].data.fd, resp, strlen(resp), 0);
         if (bytes_sent == -1) {
           perror("send");
