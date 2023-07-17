@@ -9,7 +9,7 @@
 #include "protocol.hh"
 
 typedef struct RadahnObject {
-  char *val;
+  std::string val;
   time_t exp;
 } RadahnObject;
 
