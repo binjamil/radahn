@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 
 #include "protocol.hh"
 
@@ -10,12 +11,14 @@ static CmdType getCmdType(std::string cmd_name);
 /*** PUBLIC FUNCTIONS ***/
 /************************/
 
-Cmd *parse_cmd(char *buf) {
+std::unique_ptr<Cmd> parse_cmd(char *buf) {
   // Cmd *cmd = (Cmd *)malloc(sizeof(Cmd));
   // memset(cmd, 0, sizeof(Cmd));
-  Cmd *cmd = new Cmd();
+  // Cmd *cmd = new Cmd();
+  auto cmd{std::make_unique<Cmd>()};
   if (*buf != '*') {
-    return _invalid_cmd(cmd);
+    cmd->type = CmdTypeInvalid;
+    return cmd;
   }
 
   int arglen = 0;
@@ -45,7 +48,8 @@ Cmd *parse_cmd(char *buf) {
   }
 
   if ((cmd->type = getCmdType(cmd->argv[0])) == CmdTypeInvalid) {
-    return _invalid_cmd(cmd);
+    cmd->type = CmdTypeInvalid;
+    return cmd;
   }
   return cmd;
 }
