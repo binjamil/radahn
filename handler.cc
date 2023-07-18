@@ -55,7 +55,6 @@ static void get(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
     if (obj.exp != -1) {
       time_t now = time(NULL);
       if (now >= obj.exp) {
-        // free(obj.val);
         keyspace.erase(it);
         sprintf(resp, "$-1\r\n");
         return;
@@ -85,9 +84,6 @@ static void set(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
     std::string key = cmd->argv[1];
     RadahnObject obj;
     std::string val = cmd->argv[2];
-    // size_t val_len = strlen(cmd->argv[2]) + 1;
-    // char *val = (char *)calloc(val_len, sizeof(char));
-    // memcpy(val, cmd->argv[2], val_len);
     obj.val = val;
     obj.exp = exp;
     keyspace.insert_or_assign(key, obj);
@@ -104,7 +100,6 @@ static void del(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
       std::string key = cmd->argv[i];
       auto found = keyspace.find(key);
       if (found != keyspace.end()) {
-        // free(found->second.val);
         keyspace.erase(found);
         n_del++;
       }

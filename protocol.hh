@@ -18,10 +18,9 @@ enum CmdType {
 typedef struct {
   CmdType type;
   unsigned int argc;
-  // char **argv;
   std::vector<std::string> argv;
 } Cmd;
 
-std::unique_ptr<Cmd> parse_cmd(char *buf);
+std::unique_ptr<Cmd> parse_cmd(const char *buf);
 
 #endif

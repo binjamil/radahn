@@ -1,20 +1,15 @@
 #include <cstdlib>
 #include <cstring>
-#include <memory>
 
 #include "protocol.hh"
 
-static Cmd *_invalid_cmd(Cmd *cmd);
 static CmdType getCmdType(std::string cmd_name);
 
 /************************/
 /*** PUBLIC FUNCTIONS ***/
 /************************/
 
-std::unique_ptr<Cmd> parse_cmd(char *buf) {
-  // Cmd *cmd = (Cmd *)malloc(sizeof(Cmd));
-  // memset(cmd, 0, sizeof(Cmd));
-  // Cmd *cmd = new Cmd();
+std::unique_ptr<Cmd> parse_cmd(const char *buf) {
   auto cmd{std::make_unique<Cmd>()};
   if (*buf != '*') {
     cmd->type = CmdTypeInvalid;
@@ -29,7 +24,6 @@ std::unique_ptr<Cmd> parse_cmd(char *buf) {
   }
 
   cmd->argc = arglen;
-  // cmd->argv = (char **)calloc(arglen, sizeof(char *));
 
   for (int i = 0; i < arglen; i++) {
     int tokenlen = 0;
@@ -41,9 +35,6 @@ std::unique_ptr<Cmd> parse_cmd(char *buf) {
     buf += 2;
     std::string arg(buf, tokenlen);
     cmd->argv.push_back(arg);
-    // cmd->argv[i] = (char *)calloc(tokenlen + 1, sizeof(char));
-    // memcpy(cmd->argv[i], buf, tokenlen);
-    // cmd->argv[i][tokenlen] = '\0';
     buf += tokenlen;
   }
 
@@ -54,25 +45,9 @@ std::unique_ptr<Cmd> parse_cmd(char *buf) {
   return cmd;
 }
 
-void cleanup_cmd(Cmd *cmd) {
-  // for (unsigned int i = 0; i < cmd->argc; i++) {
-  //   free(cmd->argv[i]);
-  // }
-  // if (cmd->argv) {
-  //   free(cmd->argv);
-  // }
-  // free(cmd);
-  delete cmd;
-}
-
 /*************************/
 /*** PRIVATE FUNCTIONS ***/
 /*************************/
-
-static Cmd *_invalid_cmd(Cmd *cmd) {
-  cmd->type = CmdTypeInvalid;
-  return cmd;
-}
 
 static CmdType getCmdType(std::string cmd_name) {
   if (cmd_name == "PING") {
