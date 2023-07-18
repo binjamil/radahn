@@ -114,6 +114,12 @@ SET: 38965.39 requests per second, p50=130.431 msec
 GET: 39210.15 requests per second, p50=128.767 msec
 ```
 
+**Dragonfly**
+```
+SET: 37895.73 requests per second, p50=131.455 msec                     
+GET: 38179.45 requests per second, p50=130.879 msec
+```
+
 Although Radahn is faster in basic benchmark, Redis can be configured to use pipelining to execute multiple commands at once. Radahn does not support pipelining. Here's an excerpt from Redis' website: 
 
 > By default, `redis-benchmark` does not represent the maximum throughput a Redis instance can sustain. Actually, by using pipelining and a fast client (hiredis), it is fairly easy to write a program generating more throughput than redis-benchmark.
