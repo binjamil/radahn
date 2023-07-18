@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 
@@ -36,7 +37,7 @@ static void ping(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
   if (cmd->argc == 1) {
     sprintf(resp, "+PONG\r\n");
   } else {
-    std::string pong = cmd->argv[1];
+    std::string pong{std::move(cmd->argv[1])};
     sprintf(resp, "$%lu\r\n%s\r\n", pong.length(), pong.c_str());
   }
 }
@@ -45,7 +46,7 @@ static void get(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
   if (cmd->argc < 2) {
     sprintf(resp, "-ERR: Not enough arguments\r\n");
   } else {
-    std::string key = cmd->argv[1];
+    std::string key{std::move(cmd->argv[1])};
     auto it = keyspace.find(key);
     if (it == keyspace.end()) {
       sprintf(resp, "$-1\r\n");
@@ -81,10 +82,9 @@ static void set(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
       }
       exp = time(NULL) + secs;
     }
-    std::string key = cmd->argv[1];
+    std::string key{std::move(cmd->argv[1])};
     RadahnObject obj;
-    std::string val = cmd->argv[2];
-    obj.val = val;
+    obj.val = std::move(cmd->argv[2]);
     obj.exp = exp;
     keyspace.insert_or_assign(key, obj);
     sprintf(resp, "+OK\r\n");
@@ -97,7 +97,7 @@ static void del(Keyspace& keyspace, Cmd *cmd, char *resp, int resp_len) {
   } else {
     int n_del = 0;
     for (unsigned int i = 1; i < cmd->argc; i++) {
-      std::string key = cmd->argv[i];
+    std::string key{std::move(cmd->argv[1])};
       auto found = keyspace.find(key);
       if (found != keyspace.end()) {
         keyspace.erase(found);

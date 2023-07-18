@@ -6,7 +6,7 @@
 // hanlde_cmd correctly handles SET
 
 int main(int argc, char *argv[]) {
-  std::string test_argv[3] = {"SET", "foo", "bar"};
+  std::string test_argv[3]{"SET", "foo", "bar"};
   auto cmd = setup_cmd(CmdTypeSet, 3, test_argv);
   Keyspace ks;
 

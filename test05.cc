@@ -6,8 +6,8 @@
 // hanlde_cmd correctly handles GET
 
 int main(int argc, char *argv[]) {
-  std::string test_argv[2] = {"GET", "foo"};
-  std::string test_val = "bar";
+  std::string test_argv[2]{"GET", "foo"};
+  std::string test_val{"bar"};
 
   auto cmd = setup_cmd(CmdTypeGet, 2, test_argv);
   Keyspace ks;

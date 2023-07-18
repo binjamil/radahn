@@ -7,7 +7,7 @@
 // hanlde_cmd correctly handles DEL
 
 int main(int argc, char *argv[]) {
-  std::string test_argv[2] = {"DEL", "foo"};
+  std::string test_argv[2]{"DEL", "foo"};
   std::string test_val{"bar"};
 
   auto cmd = setup_cmd(CmdTypeDel, 2, test_argv);

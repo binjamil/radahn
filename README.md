@@ -105,7 +105,7 @@ Here are the results:
 **Radahn**
 ```sh
 SET: 53216.40 requests per second, p50=94.015 msec                      
-GET: 53019.46 requests per second, p50=94.399 msec
+GET: 53117.75 requests per second, p50=94.015 msec
 ```
 
 **Redis**
