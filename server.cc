@@ -108,14 +108,13 @@ int main(int argc, char *argv[]) {
           close(events[i].data.fd);
           continue;
         }
-        Cmd *cmd = parse_cmd(buf);
-        handle_cmd(ks, cmd, resp, BUF_SIZE);
+        auto cmd = parse_cmd(buf);
+        handle_cmd(ks, cmd.get(), resp, BUF_SIZE);
         bytes_sent = send(events[i].data.fd, resp, strlen(resp), 0);
         if (bytes_sent == -1) {
           perror("send");
           exit(EXIT_FAILURE);
         }
-        cleanup_cmd(cmd);
       } else if (events[i].events & EPOLLERR) {
         perror("epoll_wait returned EPOLLERR");
         exit(EXIT_FAILURE);

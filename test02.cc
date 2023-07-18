@@ -5,11 +5,10 @@
 // parse_cmd returns CmdTypeInvalid for invalid command
 
 int main(int argc, char *argv[]) {
-  const char *buf = "*1\r\n$6\r\nBLARGH\r\n";
-  Cmd *cmd = parse_cmd((char *)buf);
+  std::string buf{"*1\r\n$6\r\nBLARGH\r\n"};
+  auto cmd = parse_cmd(buf.c_str());
   assert(cmd->type == CmdTypeInvalid);
   assert(cmd->argc == 1);
-  assert(strcmp(cmd->argv[0], "BLARGH") == 0);
-  cleanup_cmd(cmd);
+  assert(cmd->argv[0] == "BLARGH");
   printf("%s passed!\n", argv[0]);
 }

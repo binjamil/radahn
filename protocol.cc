@@ -3,18 +3,17 @@
 
 #include "protocol.hh"
 
-static Cmd *_invalid_cmd(Cmd *cmd);
-static CmdType getCmdType(char *cmd_name);
+static CmdType getCmdType(std::string cmd_name);
 
 /************************/
 /*** PUBLIC FUNCTIONS ***/
 /************************/
 
-Cmd *parse_cmd(char *buf) {
-  Cmd *cmd = (Cmd *)malloc(sizeof(Cmd));
-  memset(cmd, 0, sizeof(Cmd));
+std::unique_ptr<Cmd> parse_cmd(const char *buf) {
+  auto cmd{std::make_unique<Cmd>()};
   if (*buf != '*') {
-    return _invalid_cmd(cmd);
+    cmd->type = CmdTypeInvalid;
+    return cmd;
   }
 
   int arglen = 0;
@@ -25,7 +24,6 @@ Cmd *parse_cmd(char *buf) {
   }
 
   cmd->argc = arglen;
-  cmd->argv = (char **)calloc(arglen, sizeof(char *));
 
   for (int i = 0; i < arglen; i++) {
     int tokenlen = 0;
@@ -35,51 +33,36 @@ Cmd *parse_cmd(char *buf) {
       buf++;
     }
     buf += 2;
-    cmd->argv[i] = (char *)calloc(tokenlen + 1, sizeof(char));
-    memcpy(cmd->argv[i], buf, tokenlen);
-    cmd->argv[i][tokenlen] = '\0';
+    std::string arg(buf, tokenlen);
+    cmd->argv.push_back(arg);
     buf += tokenlen;
   }
 
   if ((cmd->type = getCmdType(cmd->argv[0])) == CmdTypeInvalid) {
-    return _invalid_cmd(cmd);
+    cmd->type = CmdTypeInvalid;
+    return cmd;
   }
   return cmd;
-}
-
-void cleanup_cmd(Cmd *cmd) {
-  for (unsigned int i = 0; i < cmd->argc; i++) {
-    free(cmd->argv[i]);
-  }
-  if (cmd->argv) {
-    free(cmd->argv);
-  }
-  free(cmd);
 }
 
 /*************************/
 /*** PRIVATE FUNCTIONS ***/
 /*************************/
 
-static Cmd *_invalid_cmd(Cmd *cmd) {
-  cmd->type = CmdTypeInvalid;
-  return cmd;
-}
-
-static CmdType getCmdType(char *cmd_name) {
-  if (strcmp(cmd_name, "PING") == 0) {
+static CmdType getCmdType(std::string cmd_name) {
+  if (cmd_name == "PING") {
     return CmdTypePing;
   }
-  if (strcmp(cmd_name, "COMMAND") == 0) {
+  if (cmd_name == "COMMAND") {
     return CmdTypeCommand;
   }
-  if (strcmp(cmd_name, "GET") == 0) {
+  if (cmd_name == "GET") {
     return CmdTypeGet;
   }
-  if (strcmp(cmd_name, "SET") == 0) {
+  if (cmd_name == "SET") {
     return CmdTypeSet;
   }
-  if (strcmp(cmd_name, "DEL") == 0) {
+  if (cmd_name == "DEL") {
     return CmdTypeDel;
   }
   return CmdTypeInvalid;

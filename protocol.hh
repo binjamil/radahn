@@ -2,6 +2,9 @@
 #define __PROTOCOL_HH__
 
 #include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
 
 enum CmdType {
   CmdTypeInvalid,
@@ -12,13 +15,12 @@ enum CmdType {
   CmdTypeDel,
 };
 
-typedef struct Cmd {
+typedef struct {
   CmdType type;
   unsigned int argc;
-  char **argv;
+  std::vector<std::string> argv;
 } Cmd;
 
-Cmd *parse_cmd(char *buf);
-void cleanup_cmd(Cmd *cmd);
+std::unique_ptr<Cmd> parse_cmd(const char *buf);
 
 #endif

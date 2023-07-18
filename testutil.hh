@@ -4,7 +4,6 @@
 #include "protocol.hh"
 #include <string>
 
-Cmd* setup_cmd(CmdType t, int argc, std::string argv[]);
-void teardown_cmd(Cmd* cmd);
+std::unique_ptr<Cmd> setup_cmd(CmdType t, int argc, std::string argv[]);
 
 #endif
