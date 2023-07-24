@@ -2,20 +2,27 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <thread>
 #include <unistd.h>
+#include <vector>
 
-#include "protocol.hh"
 #include "handler.hh"
+#include "protocol.hh"
+#include "taskqueue.hh"
 
 #define PORT "6369"
 #define BUF_SIZE 512
 #define MAX_EVENTS 10
+#define NON_SHARD_THREADS 2
+
+void keyspace_shard(unsigned id, Queue *q);
 
 int main(int argc, char *argv[]) {
   struct epoll_event ev, events[MAX_EVENTS];
@@ -63,8 +70,15 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  // Keyspace holds all key-value pairs
-  Keyspace ks;
+  unsigned num_of_shards =
+      std::thread::hardware_concurrency() - NON_SHARD_THREADS;
+  std::vector<std::shared_ptr<Queue>> task_queues;
+  std::vector<std::thread> threads;
+  for (unsigned i = 0; i < num_of_shards; i++) {
+    auto tq = create_queue();
+    task_queues.emplace_back(tq);
+    threads.emplace_back(keyspace_shard, i, tq.get());
+  }
 
   // The event loop
   while (1) {
@@ -109,15 +123,41 @@ int main(int argc, char *argv[]) {
           continue;
         }
         auto cmd = parse_cmd(buf);
-        handle_cmd(ks, cmd.get(), resp, BUF_SIZE);
-        bytes_sent = send(events[i].data.fd, resp, strlen(resp), 0);
-        if (bytes_sent == -1) {
-          perror("send");
-          exit(EXIT_FAILURE);
-        }
+        unsigned hash = cmd.get()->type == CmdTypePing ? 0 : 1;
+        Task t{};
+        t.cmd = std::move(cmd);
+        t.fd = events[i].data.fd;
+        push(task_queues[hash].get(), t);
+
+        // handle_cmd(ks, cmd.get(), resp, BUF_SIZE);
+        // bytes_sent = send(events[i].data.fd, resp, strlen(resp), 0);
+        // if (bytes_sent == -1) {
+        //   perror("send");
+        //   exit(EXIT_FAILURE);
+        // }
       } else if (events[i].events & EPOLLERR) {
         perror("epoll_wait returned EPOLLERR");
         exit(EXIT_FAILURE);
+      }
+    }
+  }
+}
+
+void keyspace_shard(unsigned id, Queue *q) {
+  // Keyspace holds only key-value pairs for this shard
+  Keyspace ks;
+
+  while (1) {
+    auto task = wait_and_pop(q);
+    printf("Got task at shard %d\n", id);
+    if (task) {
+      char resp[BUF_SIZE];
+      int bytes_sent;
+      handle_cmd(ks, task->cmd.get(), resp, BUF_SIZE);
+      bytes_sent = send(task->fd, resp, strlen(resp), 0);
+      if (bytes_sent == -1) {
+        perror("send");
+        continue;
       }
     }
   }
