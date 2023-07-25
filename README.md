@@ -14,7 +14,7 @@
 
 ## Overview
 
-Radahn is designed to be simple. It supports a tiny fraction of Redis commands, only the most useful ones, so that there are minimum overhead costs. As a result of simple design philosophy, Radahn is ~1.4x faster than Redis ([see benchmarks below](#benchmarks)).
+Radahn is designed to be simple. It supports a tiny fraction of Redis commands, only the most useful ones, so that there are minimum overhead costs. Further, it fully utlizes modern multi-core chip hardware by using the [Shared Nothing Architecture](https://en.wikipedia.org/wiki/Shared-nothing_architecture). As a result, Radahn is more than **twice as much performant** than Redis, in both throughput and latency ([see benchmarks below](#benchmarks)).
 
 ### Supported commands
 
@@ -94,26 +94,26 @@ OK
 
 ## Benchmarks
 
-Used the benchmarking utility that comes alongwith a default Redis installation called `redis-benchmark`. Ran the benchmark for commands GET and SET using 10 million requests and 10 thousand concurrent clients on both Radahn and Redis servers. 
+Used the benchmarking utility that comes alongwith a default Redis installation called `redis-benchmark`. Ran the benchmark for commands GET and SET using 10 million requests and 10,000 random keys on both Radahn and Redis servers. 
 
 ```sh
-redis-benchmark -n 10000000 -c 10000 -q -t get,set
+redis-benchmark -n 10000000 -q -t get,set --threads 16 -r 10000
 ```
 
 Here are the results:
 
 **Radahn**
 ```sh
-SET: 53216.40 requests per second, p50=94.015 msec                      
-GET: 53117.75 requests per second, p50=94.015 msec
+SET: 135547.27 requests per second, p50=0.359 msec                         
+GET: 155055.59 requests per second, p50=0.311 msec
 ```
 
 **Redis**
 ```sh
-SET: 38965.39 requests per second, p50=130.431 msec
-GET: 39210.15 requests per second, p50=128.767 msec
+SET: 67649.84 requests per second, p50=0.703 msec                         
+GET: 73795.30 requests per second, p50=0.655 msec
 ```
 
-Although Radahn is faster in basic benchmark, Redis can be configured to use pipelining to execute multiple commands at once. Radahn does not support pipelining. Here's an excerpt from Redis' website: 
+Although Radahn is faster in basic benchmark, Redis can be configured to use pipelining to execute multiple commands at once. Radahn does not support pipelining currently. Here's an excerpt from Redis' website: 
 
 > By default, `redis-benchmark` does not represent the maximum throughput a Redis instance can sustain. Actually, by using pipelining and a fast client (hiredis), it is fairly easy to write a program generating more throughput than redis-benchmark.

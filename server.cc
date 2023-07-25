@@ -2,20 +2,28 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <thread>
 #include <unistd.h>
+#include <vector>
 
-#include "protocol.hh"
+#include "crc16.hh"
 #include "handler.hh"
+#include "protocol.hh"
+#include "taskqueue.hh"
 
 #define PORT "6369"
 #define BUF_SIZE 512
 #define MAX_EVENTS 10
+#define NON_SHARD_THREADS 2
+
+void keyspace_shard(unsigned id, Queue *q);
 
 int main(int argc, char *argv[]) {
   struct epoll_event ev, events[MAX_EVENTS];
@@ -63,8 +71,16 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  // Keyspace holds all key-value pairs
-  Keyspace ks;
+  unsigned num_of_shards =
+      std::thread::hardware_concurrency();
+  std::vector<std::shared_ptr<Queue>> task_queues;
+  std::vector<std::thread> threads;
+  for (unsigned i = 0; i < num_of_shards; i++) {
+    auto tq = create_queue();
+    task_queues.emplace_back(tq);
+    threads.emplace_back(keyspace_shard, i, tq.get());
+  }
+  unsigned round_robin_counter = 0;
 
   // The event loop
   while (1) {
@@ -93,31 +109,56 @@ int main(int argc, char *argv[]) {
         struct sockaddr_in *sa = (struct sockaddr_in *)&client_addr;
         char ip4[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &sa->sin_addr, ip4, INET_ADDRSTRLEN);
-        printf("Accepted new connection: (%s, %d)\n", ip4, sa->sin_port);
+        // printf("Accepted new connection: (%s, %d)\n", ip4, sa->sin_port);
       } else if (events[i].events & EPOLLIN) {
         // A connected client sent a command! Handle it
-        char buf[BUF_SIZE], resp[BUF_SIZE];
-        int bytes_read, bytes_sent;
+        char buf[BUF_SIZE];
+        int bytes_read;
         bytes_read = recv(events[i].data.fd, buf, BUF_SIZE, 0);
         if (bytes_read == -1) {
           perror("recv");
           exit(EXIT_FAILURE);
         }
         if (bytes_read == 0) {
-          printf("Client disconnected\n");
+          // printf("Client disconnected\n");
           close(events[i].data.fd);
           continue;
         }
         auto cmd = parse_cmd(buf);
-        handle_cmd(ks, cmd.get(), resp, BUF_SIZE);
-        bytes_sent = send(events[i].data.fd, resp, strlen(resp), 0);
-        if (bytes_sent == -1) {
-          perror("send");
-          exit(EXIT_FAILURE);
+        Task t{};
+        t.cmd = std::move(cmd);
+        t.fd = events[i].data.fd;
+        if (t.cmd->type == CmdTypePing || t.cmd->type == CmdTypeCommand ||
+            t.cmd->type == CmdTypeInvalid) {
+          push(task_queues[round_robin_counter].get(), t);
+          round_robin_counter = (round_robin_counter + 1) % num_of_shards;
+        } else {
+          std::string key = t.cmd->argv[1];
+          auto hash = crc16(0, key, key.size());
+          push(task_queues[hash % num_of_shards].get(), t);
         }
       } else if (events[i].events & EPOLLERR) {
         perror("epoll_wait returned EPOLLERR");
         exit(EXIT_FAILURE);
+      }
+    }
+  }
+}
+
+void keyspace_shard(unsigned id, Queue *q) {
+  // Keyspace holds only key-value pairs for this shard
+  Keyspace ks;
+
+  while (1) {
+    auto task = wait_and_pop(q);
+    if (task) {
+      char resp[BUF_SIZE];
+      int bytes_sent;
+      handle_cmd(ks, task->cmd.get(), resp, BUF_SIZE);
+      bytes_sent = send(task->fd, resp, strlen(resp), 0);
+      if (bytes_sent == -1) {
+        perror("send");
+        continue;
       }
     }
   }
