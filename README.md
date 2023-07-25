@@ -14,7 +14,7 @@
 
 ## Overview
 
-Radahn is designed to be simple. It supports a tiny fraction of Redis commands, only the most useful ones, so that there are minimum overhead costs. Further, it fully utlizes modern multi-core chip hardware by using the [Shared Nothing Architecture](https://en.wikipedia.org/wiki/Shared-nothing_architecture). As a result, Radahn is more than twice as performant than Redis, in both throughput and latency ([see benchmarks below](#benchmarks)).
+Radahn is designed to be simple. It supports a tiny fraction of Redis commands, only the most useful ones, so that there are minimum overhead costs. Further, it fully utlizes modern multi-core chip hardware by using the [Shared Nothing Architecture](https://en.wikipedia.org/wiki/Shared-nothing_architecture). As a result, Radahn is more than **twice as much performant** than Redis, in both throughput and latency ([see benchmarks below](#benchmarks)).
 
 ### Supported commands
 
@@ -94,7 +94,7 @@ OK
 
 ## Benchmarks
 
-Used the benchmarking utility that comes alongwith a default Redis installation called `redis-benchmark`. Ran the benchmark for commands GET and SET using 10 million requests and 10,000 random keyspace on both Radahn and Redis servers. 
+Used the benchmarking utility that comes alongwith a default Redis installation called `redis-benchmark`. Ran the benchmark for commands GET and SET using 10 million requests and 10,000 random keys on both Radahn and Redis servers. 
 
 ```sh
 redis-benchmark -n 10000000 -q -t get,set --threads 16 -r 10000
