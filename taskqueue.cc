@@ -21,7 +21,7 @@ std::shared_ptr<Task> wait_and_pop(Queue *q) {
   q->cond.wait(lk, [q] { return !q->queue.empty(); });
   auto res{std::make_shared<Task>(q->queue.front())};
   q->queue.pop();
-  // return res;
+  return res;
 }
 
 /*************************/

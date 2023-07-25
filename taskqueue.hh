@@ -8,17 +8,10 @@
 
 #include "protocol.hh"
 
-class Task {
-public:
-  std::unique_ptr<Cmd> cmd;
+typedef struct Task {
+  std::shared_ptr<Cmd> cmd;
   int fd;
-
-  Task() {}
-
-  Task(const Task& other) {
-    fd = other.fd;
-  }
-};
+} Task;
 
 typedef struct Queue {
   std::mutex mut;

@@ -10,13 +10,13 @@ all: $(BINS)
 %.o: %.cc
 	$(CC) $(CFLAGS) $^ -c
 
-test%: protocol.o handler.o taskqueue.o test%.o testutil.o
+test%: protocol.o handler.o taskqueue.o crc16.o test%.o testutil.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 check: $(TESTS)
 	set -e; for t in $(TESTS); do ./$$t; done
 
-server: server.o protocol.o handler.o taskqueue.o
+server: server.o protocol.o handler.o taskqueue.o crc16.o
 	$(CC) $(LDFLAGS) $^ -lpthread -o $@
 
 clean:
