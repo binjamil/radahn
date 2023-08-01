@@ -2,7 +2,7 @@
 #define __CRC_HH__
 
 #include <cstdint>
-#include <string>
+#include <string_view>
 
 static const uint16_t crc16_table[256] = {
     0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241, 0xC601,
@@ -39,6 +39,6 @@ static inline uint16_t crc16_byte(uint16_t crc, uint8_t data) {
   return (crc >> 8) ^ crc16_table[(crc ^ data) & 0xff];
 }
 
-uint16_t crc16(uint16_t, std::string, size_t);
+uint16_t crc16(uint16_t, std::string_view, size_t);
 
 #endif
