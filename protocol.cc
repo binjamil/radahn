@@ -1,9 +1,10 @@
 #include <cstdlib>
 #include <cstring>
+#include <string_view>
 
 #include "protocol.hh"
 
-static CmdType getCmdType(std::string cmd_name);
+static CmdType getCmdType(std::string_view cmd_name);
 
 /************************/
 /*** PUBLIC FUNCTIONS ***/
@@ -49,7 +50,7 @@ std::unique_ptr<Cmd> parse_cmd(const char *buf) {
 /*** PRIVATE FUNCTIONS ***/
 /*************************/
 
-static CmdType getCmdType(std::string cmd_name) {
+static CmdType getCmdType(std::string_view cmd_name) {
   if (cmd_name == "PING") {
     return CmdTypePing;
   }

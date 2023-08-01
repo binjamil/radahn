@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <string_view>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -133,7 +134,7 @@ int main(int argc, char *argv[]) {
           push(task_queues[round_robin_counter].get(), t);
           round_robin_counter = (round_robin_counter + 1) % num_of_shards;
         } else {
-          std::string key = t.cmd->argv[1];
+          std::string_view key = t.cmd->argv[1];
           auto hash = crc16(0, key, key.size());
           push(task_queues[hash % num_of_shards].get(), t);
         }
